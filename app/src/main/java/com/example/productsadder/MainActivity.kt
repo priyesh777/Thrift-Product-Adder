@@ -38,19 +38,40 @@ class MainActivity : AppCompatActivity() {
                 }.show()
         }
 
-        // FOR IMAGE ADDER
-//        val selectImagesActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-//            if(result.resultCode == RESULT_OK){
-//                val intent = result.data
-//            }
-//        }
-//
-//        binding.buttonImagesPicker.setOnClickListener{
-//            val intent = Intent(ACTION_GET_CONTENT)
-//            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-//            intent.type = "image/*"
-//            selectImagesActivityResult.launch(intent)
-//        }
+//         FOR IMAGE ADDER
+        val selectImagesActivityResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
+            if(result.resultCode == RESULT_OK){
+                val intent = result.data
+
+                //Multiple Images Selected
+                if(intent?.clipData != null) {
+                    val count = intent.clipData?.itemCount ?: 0
+                    (0 until count).forEach {
+                     val imageUri = intent.clipData?.getItemAt(it)?.uri
+                    imageUri?.let {
+                        selectedImages.add(it)
+                    }
+                    }
+                } else {
+                    val imageUri = intent?.data
+                    imageUri?.let { selectedImages.add(it) }
+                }
+                updateImages()
+            }
+        }
+
+        binding.buttonImagesPicker.setOnClickListener{
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            intent.type = "image/*"
+            selectImagesActivityResult.launch(intent)
+        }
+
+    }
+
+    private fun updateImages() {
+        binding.tvSelectedImages.text = selectedImages.size.toString()
     }
 
     private fun updateColors() {
@@ -61,6 +82,14 @@ class MainActivity : AppCompatActivity() {
         binding.tvSelectedColors.text = colors
     }
 
+//    private fun saveProduct() {
+//        val name = binding.edName.text.toString().trim()
+//        val category = binding.edCategory.text.toString().trim()
+//        val price = binding.edPrice.text.toString().trim()
+//        val offerPercentage = binding.offerPercentage.text.toString().trim()
+//        val description = binding.edDescription.text.toString().trim()
+//        val sizes = get
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
